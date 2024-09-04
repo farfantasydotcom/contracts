@@ -1,0 +1,56 @@
+Pre Deployment 
+    Degen contract inside constructor, non modifiable. 
+        What if degen dies, migrate to another whole new set of contracts
+
+    Project Renames
+    cleanupls 
+
+Post Deployments 
+    Mint all the 
+
+Degen Way 
+
+
+Constructor 
+    Fees tp 2.5% 
+    Degen contract address : non Changable 
+    FarcasterID contract address : changable
+
+
+
+================================================================
+
+Farocle 
+    fid to address check and mapping with time stamp 
+    followers count 
+
+address to 
+    fid 
+    followers 
+    following 
+    channels_count
+    channels_cumulative_follower_count 
+    channels_cumulative_follower_count_as_hosts 
+    active_status 
+    power_badge
+    networth 
+    score
+
+comparision 
+    equals 
+
+    Use external contract for 
+        range, 
+        greater than,
+        less than,
+        greater than equal to,
+        less than equal to,
+
+
+Current 
+
+    Admin 
+        Merkel proof root hash 
+
+        Proofs in 
+

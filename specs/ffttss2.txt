@@ -1,0 +1,33 @@
+APIs for mini game 
+    Deck 
+        Cards with profile detail 
+        Score of each cards grouped by each day 
+        Rank of the deck 
+
+    USers'holding 
+        From wallet 
+
+
+
+
+DB 
+    Deck 
+        Deck txn 
+        + delete 
+        + current cards 
+        + rank 
+        + Score 
+    Users 
+        + wallet 
+        + in game balance (derive from balance)
+        + in usage
+        + 
+        + decks 
+        + cards 
+        + Balance is moved in - moved out - in decks 
+
+
+create a decks from create 
+    update with edit 
+    update with delete
+

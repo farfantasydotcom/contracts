@@ -1,0 +1,70 @@
+Dynamic Items 
+
+Duplicate Items of same key 
+
+Number of Items dynamic 
+
+
+
+Edits are just empty it and add it back with all checks, a gas insentive operation.
+
+erc721 => erc1155 => [counts, next_erc1155]
+
+Deck erc721 => first_erc1155
+
+
+Whoever own the deck can own the underlaying items.
+
+
+Get Deck 
+    fids 
+    first unique fids 
+    first unique fids with count
+
+
+
+Editing Deck 
+    Make sure ID is with owner 
+
+    Should able to prepend in the list 
+    Should able to append in the list
+    should able to remove certain items from the list 
+    should able to insert at random place in the list 
+    should able to replace certain items randomly in the list
+    should able to increase the count of certain items in the list
+
+    new key 
+    new key count 
+    existing key
+    key count 
+
+    operations 
+        prepend //Item will be inserted in the front of the list
+        append  //Item will be inserted in the end of the list
+        remove  //Item will be removed from the list
+        update  //Item will be updated in the list
+        replace //Item will be replaced in the list
+        insert  //Item will be inserted between the list
+
+
+    Data 
+
+    
+    
+Plan 2 
+
+    
+    How about multiple mint function from different contract call the NFT 
+
+    Keys and its balance will be maintained by the NFT contract
+    But logic of how the 
+
+
+Plan 3: Dont think, too much, just finish and escape from this project. 
+
+    Just 5 cards per deck, no rearrange, no amounts 
+    Inventory 
+    Deck to deck transfer
+    Multiple Deck from single inventory
+
+

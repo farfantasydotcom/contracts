@@ -60,9 +60,9 @@ describe("Moxie Cards", function() {
       }
 
 
-      MoxieOracle = await ethers.getContractFactory("MoxieOracle");
-      MoxieCards = await ethers.getContractFactory("MoxieCards");
-      MoxieDecks = await ethers.getContractFactory("MoxieDecks");
+      //MoxieOracle = await ethers.getContractFactory("MoxieOracle");
+      MoxieCards = await ethers.getContractFactory("FarfantasyMoxieCards");
+      MoxieDecks = await ethers.getContractFactory("FarfantasyMoxieDecks");
       
       ERC20 = await ethers.getContractFactory("ERC20");
 
@@ -77,8 +77,8 @@ describe("Moxie Cards", function() {
       moxieToken = await ERC20.deploy("Moxie Token", "MOXIE", 18, degenSupply);
       console.log("Moxie Token Deployed at ::", moxieToken.target);
 
-      moxieOracle = await MoxieOracle.deploy();
-      console.log("MoxieOracle Deployed at ::", moxieOracle.target);
+      //moxieOracle = await MoxieOracle.deploy();
+      //console.log("MoxieOracle Deployed at ::", moxieOracle.target);
 
       moxieCards = await MoxieCards.deploy();
       console.log("MoxieCards Deployed at ::", moxieCards.target);

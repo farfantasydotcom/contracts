@@ -61,6 +61,7 @@ describe("Moxie Cards", function() {
 
 
       //MoxieOracle = await ethers.getContractFactory("MoxieOracle");
+      MoxieTokenManager = await ethers.getContractFactory("MoxieTokenManager");
       MoxieCards = await ethers.getContractFactory("FarfantasyMoxieCards");
       MoxieDecks = await ethers.getContractFactory("FarfantasyMoxieDecks");
       
@@ -80,11 +81,19 @@ describe("Moxie Cards", function() {
       //moxieOracle = await MoxieOracle.deploy();
       //console.log("MoxieOracle Deployed at ::", moxieOracle.target);
 
+      moxieTokenManager = await MoxieTokenManager.deploy();
+      console.log("MoxieTokenManager Deployed at ::", moxieTokenManager.target);
+
       moxieCards = await MoxieCards.deploy();
       console.log("MoxieCards Deployed at ::", moxieCards.target);
 
       moxieDecks = await MoxieDecks.deploy(moxieToken.target, moxieCards.target);
       console.log("MoxieDecks Deployed at ::", moxieDecks.target);
+
+      for(let fid of ERC20Fids) {
+        await moxieTokenManager.connect(owner).setToken(FidCoins[fid].target, FidCoins[fid].target);
+
+      }
 
 
       console.log();
@@ -118,6 +127,10 @@ describe("Moxie Cards", function() {
         var timestamp = await time.latest();        
         var txn = await moxieCards.connect(owner).updateSubjectERC20FIDBulk(FidCoinsAddresses, ERC20Fids);
         await expect(txn).to.emit(moxieCards, 'MappedFT2FID').withArgs(FidCoins[1].target, 1, timestamp + 1);
+
+        await moxieCards.connect(owner).setFanTokenManager(moxieTokenManager.target);
+
+        //await moxieTokenManager.connect(owner).setMoxieToken(moxieToken.target);
         
 
       });
@@ -137,7 +150,7 @@ describe("Moxie Cards", function() {
           await expect(txn).to.be.revertedWith("Invalid Cards");
 
           var txn =  moxieCards.connect(addr2).mint(moxieCards.target, 1);
-          await expect(txn).to.be.revertedWith("Invalid Subject FT");          
+          await expect(txn).to.be.revertedWith("Invalid Subject");          
         })
 
 
@@ -241,7 +254,7 @@ describe("Moxie Cards", function() {
 
         it("Negative tests for burn", async function() {
           var txn =  moxieCards.connect(addr7).burn(addr7.address, 1);
-          await expect(txn).to.be.revertedWith("Invalid Subject FT");
+          await expect(txn).to.be.revertedWith("Invalid Subject");
 
           var txn =  moxieCards.connect(addr7).burn(FidCoins[1].target, 0);
           await expect(txn).to.be.revertedWith("Invalid Cards");

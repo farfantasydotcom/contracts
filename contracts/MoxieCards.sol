@@ -2334,8 +2334,8 @@ interface IFanTokensERC20 {
     function symbol() external view returns (string calldata);
 }
 
-interface IMoxieOracle {
-    function getFIDERC20Address(uint256 fid) external view returns (address);
+interface ITokenManager {
+    function tokens(address _subject) view external returns (address token_);
 }
 
 
@@ -2356,17 +2356,22 @@ contract FarfantasyMoxieCards is ERC1155, Ownable, ERC1155Supply {
     //How much cards minted per fid per user. 
     mapping(address ft => mapping(address user => uint256 cards)) public minted;
 
-
+    //this is fan token manager contract
+    ITokenManager public fanTokenManager;
 
     //This constructer is for local net with variable addresses
     constructor() ERC1155() Ownable(msg.sender) {
-
+        //Set the fantoken manager contract
+        fanTokenManager = ITokenManager(0x5FbDB2315678afecb367f032d93F642f64180aa3);
     }   
 
 
     event MoxieCard(address indexed user, address indexed subject_ft, uint256 indexed fid, uint256 cards, uint256 amount_ft, bool isBuy, uint256 timestamp);
     //Mint a card based on FT ERC20
-    function mint(address subject_ft, uint256 cards) public {
+    function mint(address subject_eoa, uint256 cards) public {
+
+        address subject_ft = fanTokenManager.tokens(subject_eoa);
+        require(subject_ft != address(0), "Invalid Subject");
 
         uint256 fid = subjectERC20FID[subject_ft];
         
@@ -2400,23 +2405,29 @@ contract FarfantasyMoxieCards is ERC1155, Ownable, ERC1155Supply {
     }
 
     //Mint a batch of cards based on FT ERC20
-    function mintBatch(address[] calldata subject_fts, uint256[] calldata cards) public {
+    function mintBatch(address[] calldata subject_eoas, uint256[] calldata cards) public {
         //Parameters should be equal 
-        require(subject_fts.length == cards.length && subject_fts.length > 0, "Mismatch");
+        require(subject_eoas.length == cards.length && subject_eoas.length > 0, "Mismatch");
 
         //Make sure the FTs are unique, this simplifies the logic
-        //require(isUniqueArray(subject_fts), "Duplicate FTs");
+        require(isUniqueArray(subject_eoas), "Duplicate FTs");
 
 
         uint256 totalSupply = 0;
         uint256 amount_ft = 0;
         uint256 fid = 0;
-        uint256[] memory fids = new uint256[](subject_fts.length);
+        uint256[] memory fids = new uint256[](subject_eoas.length);
+
+        address subject_ft = address(0);
         
-        for (uint256 i = 0; i < subject_fts.length; i++) {
+        for (uint256 i = 0; i < subject_eoas.length; i++) {
+
+            subject_ft = fanTokenManager.tokens(subject_eoas[i]);
+            require(subject_ft != address(0), "Invalid Subject");
+
 
             //Get the FID of the FT ERC20
-            fid = subjectERC20FID[subject_fts[i]];
+            fid = subjectERC20FID[subject_ft];
 
             //FT must be whitelisted
             require(fid > 0, "Invalid Subject FT");
@@ -2425,31 +2436,36 @@ contract FarfantasyMoxieCards is ERC1155, Ownable, ERC1155Supply {
             require(cards[i] > 0, "Invalid Cards");
 
             //Get the total Supply of the FT ERC20
-            totalSupply = IFanTokensERC20(subject_fts[i]).totalSupply();
+            totalSupply = IFanTokensERC20(subject_ft).totalSupply();
 
             //FT Amount should be more than 0
             amount_ft = (totalSupply * cards[i]) / AMOUNT_RATIO_TO_SUPPLY;
             require(amount_ft > 0, "Insufficient Fees");
 
             //Transfer the FT from the user to this contract
-            IERC20(subject_fts[i]).safeTransferFrom(msg.sender, address(this), amount_ft);
+            IERC20(subject_ft).safeTransferFrom(msg.sender, address(this), amount_ft);
 
             //How much of this FT is locked for this user
-            lockedFT[subject_fts[i]][msg.sender] += amount_ft;
+            lockedFT[subject_ft][msg.sender] += amount_ft;
         
             //How much cards of this Profile are minted by this user
-            minted[subject_fts[i]][msg.sender] += cards[i];
+            minted[subject_ft][msg.sender] += cards[i];
 
             //collect the fids in an array
             fids[i] = fid;
 
-            emit MoxieCard(msg.sender, subject_fts[i], fid, cards[i], amount_ft, true, block.timestamp);
+            emit MoxieCard(msg.sender, subject_ft, fid, cards[i], amount_ft, true, block.timestamp);
         }
         _mintBatch(msg.sender, fids, cards, "");
     }
 
     //burn a card based on FT ERC20
-    function burn(address subject_ft, uint256 cards) public {       
+    function burn(address subject_eoa, uint256 cards) public {       
+
+        //Use token manager to get the FT ERC20
+        address subject_ft = fanTokenManager.tokens(subject_eoa);
+        require(subject_ft != address(0), "Invalid Subject");
+
         
         //Get the FID of the FT ERC20
         uint256 fid = subjectERC20FID[subject_ft];
@@ -2494,26 +2510,32 @@ contract FarfantasyMoxieCards is ERC1155, Ownable, ERC1155Supply {
     }
 
     //Burn Multiple cards based on FT ERC20
-    function burnBatch(address[] calldata subject_fts, uint256[] calldata cards) public {
+    function burnBatch(address[] calldata subject_eoas, uint256[] calldata cards) public {
         //Parameters should be equal
-        require(subject_fts.length == cards.length && subject_fts.length > 0, "Mismatch");
+        require(subject_eoas.length == cards.length && subject_eoas.length > 0, "Mismatch");
 
         //Make sure the FTs are unique, this simplifies the logic
-        require(isUniqueArray(subject_fts), "Duplicate FTs");
+        require(isUniqueArray(subject_eoas), "Duplicate FTs");
 
         uint256 fid = 0;
         uint256 amount_ft = 0;
-        uint256[] memory fids = new uint256[](subject_fts.length);
+        uint256[] memory fids = new uint256[](subject_eoas.length);
         uint256 withdrawAmount = 0;
 
         uint256 _cardBalance = 0;
         uint256 _cardMinted = 0;
 
+        address subject_ft = address(0);
 
-        for (uint256 i = 0; i < fids.length; i++) {
+
+        for (uint256 i = 0; i < subject_eoas.length; i++) {
+
+            subject_ft = fanTokenManager.tokens(subject_eoas[i]);
+            require(subject_ft != address(0), "Invalid Subject");
+
 
             //Get the FID of the FT ERC20
-            fid = subjectERC20FID[subject_fts[i]];
+            fid = subjectERC20FID[subject_ft];
 
             //FT must be whitelisted
             require(fid > 0, "Invalid Subject FT");
@@ -2526,11 +2548,11 @@ contract FarfantasyMoxieCards is ERC1155, Ownable, ERC1155Supply {
             require(_cardBalance >= cards[i], "Insufficient cards balance");
 
             //Get the minted number of cards by this user
-            _cardMinted = minted[subject_fts[i]][msg.sender];
+            _cardMinted = minted[subject_ft][msg.sender];
             require(_cardMinted >= cards[i], "Mismatch Mints");
 
             //Get the locked FT amount for this FId and its user 
-            amount_ft = lockedFT[subject_fts[i]][msg.sender];
+            amount_ft = lockedFT[subject_ft][msg.sender];
 
             //Calculate the withdrawable amount
             withdrawAmount = ((amount_ft * cards[i]) / _cardMinted);
@@ -2540,18 +2562,18 @@ contract FarfantasyMoxieCards is ERC1155, Ownable, ERC1155Supply {
 
 
             //Subtract the locked FT amount
-            lockedFT[subject_fts[i]][msg.sender] -= withdrawAmount;
+            lockedFT[subject_ft][msg.sender] -= withdrawAmount;
 
             //Subtract the minted cards
-            minted[subject_fts[i]][msg.sender] -= cards[i];
+            minted[subject_ft][msg.sender] -= cards[i];
 
             //collect the fids in an array
             fids[i] = fid;
 
             //Transfer the FT to the user
-            IERC20(subject_fts[i]).safeTransfer(msg.sender, withdrawAmount);
+            IERC20(subject_ft).safeTransfer(msg.sender, withdrawAmount);
 
-            emit MoxieCard(msg.sender, subject_fts[i], fid, cards[i], withdrawAmount, false, block.timestamp);
+            emit MoxieCard(msg.sender, subject_ft, fid, cards[i], withdrawAmount, false, block.timestamp);
 
         }
 
@@ -2602,6 +2624,9 @@ contract FarfantasyMoxieCards is ERC1155, Ownable, ERC1155Supply {
         whitelistedContracts[_contract] = _status;
     }
 
+    function setFanTokenManager(address _fanTokenManager) public onlyOwner {
+        fanTokenManager = ITokenManager(_fanTokenManager);
+    }
     
 
     /************************************************************************/

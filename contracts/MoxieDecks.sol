@@ -263,7 +263,6 @@ contract FarfantasyMoxieDecks is Ownable {
     //$MOXIE token address
     IERC20 public MOXIE_TOKEN; 
         
-    /*
 
     constructor() Ownable(msg.sender) {
         DeckID = 1_000_000_000;
@@ -278,14 +277,15 @@ contract FarfantasyMoxieDecks is Ownable {
         DeckInitialPrice = 1_000_000_000_000_000_000_000; //1000 Degen
 
         //Degen token address
-        MOXIE_TOKEN = IERC20(0x4ed4E862860beD51a9570b96d89aF5E1B0Efefed);
+        MOXIE_TOKEN = IERC20(0x8C9037D1Ef5c6D1f6816278C7AAF5491d24CD527);
 
         //Far Fantasy Card contract
-        moxieCard = IMoxieCards(0xEDD1c688d8E75849D52316237E6634E382b03310);
+        moxieCard = IMoxieCards(0x9fE0109bBE595618fc977F5014f230D96228797f);
 
     }
-    
-    */
+
+    /*
+
 
     constructor(address _moxie_token, address _moxie_card) Ownable(msg.sender) {
         DeckID = 1_000_000_000;
@@ -306,6 +306,7 @@ contract FarfantasyMoxieDecks is Ownable {
         moxieCard = IMoxieCards(_moxie_card);
     }
     
+    */
 
 
     //events 

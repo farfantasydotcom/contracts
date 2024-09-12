@@ -2345,7 +2345,7 @@ contract FarfantasyMoxieCards is ERC1155, Ownable, ERC1155Supply {
 
     //Ratio of the amount of FT to the supply to mint a card
     //100 = 1% 1000 = 0.1% 200 = 0.5% Supply 
-    uint256 public constant AMOUNT_RATIO_TO_SUPPLY = 200; 
+    uint256 public constant AMOUNT_RATIO_TO_SUPPLY = 1000; 
 
     //Mapping the SubjectERC20 of a member to its FID
     mapping(address => uint256) public subjectERC20FID;
@@ -2362,9 +2362,12 @@ contract FarfantasyMoxieCards is ERC1155, Ownable, ERC1155Supply {
     //This constructer is for local net with variable addresses
     constructor() ERC1155() Ownable(msg.sender) {
         //Set the fantoken manager contract
-        fanTokenManager = ITokenManager(0x5FbDB2315678afecb367f032d93F642f64180aa3);
+        fanTokenManager = ITokenManager(0xFfeACE4541276aC65c4e433B7fC63cdA32b30470);
     }   
 
+    function getSubject(address subject_eoa) public view returns (address) {
+        return fanTokenManager.tokens(subject_eoa);
+    }
 
     event MoxieCard(address indexed user, address indexed subject_ft, uint256 indexed fid, uint256 cards, uint256 amount_ft, bool isBuy, uint256 timestamp);
     //Mint a card based on FT ERC20
